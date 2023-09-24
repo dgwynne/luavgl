@@ -390,6 +390,15 @@ static int luavgl_obj_clear_state(lua_State *L)
   return 0;
 }
 
+static int luavgl_obj_has_state(lua_State *L)
+{
+  lv_obj_t *obj = luavgl_to_obj(L, 1);
+  lv_state_t state = lua_tointeger(L, 2);
+  lua_pushboolean(L, lv_obj_has_state(obj, state));
+
+  return 1;
+}
+
 /**
  * obj:scroll_by(x, y, anim_en)
  */
@@ -668,6 +677,7 @@ static const luaL_Reg luavgl_obj_methods[] = {
     {"clear_flag",               luavgl_obj_clear_flag              },
     {"add_state",                luavgl_obj_add_state               },
     {"clear_state",              luavgl_obj_clear_state             },
+    {"has_state",                luavgl_obj_has_state               },
     {"add_style",                luavgl_obj_add_style               },
     {"remove_style",             luavgl_obj_remove_style            },
     {"remove_style_all",         luavgl_obj_remove_style_all        },
