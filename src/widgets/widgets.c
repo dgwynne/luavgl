@@ -5,6 +5,10 @@
 #include "bar.c"
 #endif
 
+#if LV_USE_BTN
+#include "btn.c"
+#endif
+
 #if LV_USE_CALENDAR
 #include "calendar.c"
 #endif
@@ -62,6 +66,11 @@ static const luaL_Reg widget_create_methods[] = {
     {"Bar", luavgl_bar_create},
 #endif
 
+#if LV_USE_BTN
+    {"Btn", luavgl_bar_create},
+    {"Button", luavgl_bar_create},
+#endif
+
 #if LV_USE_CALENDAR
     {"Calendar", luavgl_calendar_create},
 #endif
@@ -116,6 +125,10 @@ static void luavgl_widgets_init(lua_State *L)
 {
 #if LV_USE_BAR
   luavgl_bar_init(L);
+#endif
+
+#if LV_USE_BTN
+  luavgl_btn_init(L);
 #endif
 
 #if LV_USE_IMG
