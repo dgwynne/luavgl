@@ -37,6 +37,17 @@ static void _lv_obj_set_align(void *obj, lua_State *L)
   lv_obj_align(obj, align, x_ofs, y_ofs);
 }
 
+static void
+_lv_obj_set_checkable(void *obj, lua_State *L)
+{
+	int checkable = lua_toboolean(L, -1);
+
+	if (checkable)
+		lv_obj_add_flag(obj, LV_OBJ_FLAG_CHECKABLE);
+	else
+		lv_obj_clear_flag(obj, LV_OBJ_FLAG_CHECKABLE);
+}
+
 /**
  * @brief Set obj properties based on property table on stack top
  *
@@ -374,6 +385,14 @@ static int luavgl_obj_clear_flag(lua_State *L)
   return 0;
 }
 
+static int luavgl_obj_has_flag(lua_State *L)
+{
+  lv_obj_t *obj = luavgl_to_obj(L, 1);
+  lv_state_t state = lua_tointeger(L, 2);
+  lua_pushboolean(L, lv_obj_has_flag(obj, state));
+  return 1;
+}
+
 static int luavgl_obj_add_state(lua_State *L)
 {
   lv_obj_t *obj = luavgl_to_obj(L, 1);
@@ -395,7 +414,6 @@ static int luavgl_obj_has_state(lua_State *L)
   lv_obj_t *obj = luavgl_to_obj(L, 1);
   lv_state_t state = lua_tointeger(L, 2);
   lua_pushboolean(L, lv_obj_has_state(obj, state));
-
   return 1;
 }
 
@@ -631,6 +649,27 @@ static int luavgl_obj_remove_anim_all(lua_State *L)
   return 1;
 }
 
+static int
+luavgl_obj_checkable(lua_State *L)
+{
+	lv_obj_t *obj = luavgl_to_obj(L, 1);
+	int checkable;
+
+	if (lua_gettop(L) > 1) {
+		/* set */
+		checkable = lua_toboolean(L, 2);
+		if (checkable)
+			lv_obj_add_flag(obj, LV_OBJ_FLAG_CHECKABLE);
+		else
+			lv_obj_clear_flag(obj, LV_OBJ_FLAG_CHECKABLE);
+	} else
+		checkable = lv_obj_has_flag(obj, LV_OBJ_FLAG_CHECKABLE);
+
+	lua_pushboolean(L, checkable);
+
+	return (1);
+}
+
 static int luavgl_obj_gc(lua_State *L)
 {
   if (lua_type(L, 1) != LUA_TUSERDATA) {
@@ -675,6 +714,7 @@ static const luaL_Reg luavgl_obj_methods[] = {
     {"is_visible",               luavgl_obj_is_visible              },
     {"add_flag",                 luavgl_obj_add_flag                },
     {"clear_flag",               luavgl_obj_clear_flag              },
+    {"has_flag",                 luavgl_obj_has_flag                },
     {"add_state",                luavgl_obj_add_state               },
     {"clear_state",              luavgl_obj_clear_state             },
     {"has_state",                luavgl_obj_has_state               },
@@ -708,6 +748,8 @@ static const luaL_Reg luavgl_obj_methods[] = {
     {"anim",                     luavgl_anim_create                 },
     {"Anim",                     luavgl_anim_create                 },
     {"remove_all_anim",          luavgl_obj_remove_anim_all         }, /* remove all */
+    {"checkable",                luavgl_obj_checkable               },
+
     {NULL,                       NULL                               },
 };
 
@@ -743,6 +785,7 @@ static const luavgl_value_setter_t obj_property_table[] = {
     {"w",              0,                 {.setter = (setter_int_t)lv_obj_set_width}         },
     {"h",              0,                 {.setter = (setter_int_t)lv_obj_set_height}        },
     {"align",          SETTER_TYPE_STACK, {.setter_stack = _lv_obj_set_align}                },
+    {"checkable",      SETTER_TYPE_STACK, {.setter_stack = _lv_obj_set_checkable}            },
 
     {"scrollbar_mode", 0,                 {.setter = (setter_int_t)lv_obj_set_scrollbar_mode}},
     {"scroll_dir",     0,                 {.setter = (setter_int_t)lv_obj_set_scroll_dir}    },
