@@ -1,6 +1,10 @@
 #include "luavgl.h"
 #include "private.h"
 
+#if LV_USE_BAR
+#include "bar.c"
+#endif
+
 #if LV_USE_CALENDAR
 #include "calendar.c"
 #endif
@@ -37,6 +41,10 @@
 #include "roller.c"
 #endif
 
+#if LV_USE_SLIDER
+#include "slider.c"
+#endif
+
 #if LV_USE_SWITCH
 #include "switch.c"
 #endif
@@ -49,6 +57,10 @@ static int luavgl_obj_create(lua_State *L);
 
 static const luaL_Reg widget_create_methods[] = {
     {"Object",   luavgl_obj_create     },
+
+#if LV_USE_BAR
+    {"Bar", luavgl_bar_create},
+#endif
 
 #if LV_USE_CALENDAR
     {"Calendar", luavgl_calendar_create},
@@ -86,6 +98,10 @@ static const luaL_Reg widget_create_methods[] = {
     {"Roller",   luavgl_roller_create  },
 #endif
 
+#if LV_USE_SLIDER
+    {"Slider", luavgl_slider_create},
+#endif
+
 #if LV_USE_SWITCH
     {"Switch", luavgl_switch_create},
 #endif
@@ -98,6 +114,10 @@ static const luaL_Reg widget_create_methods[] = {
 
 static void luavgl_widgets_init(lua_State *L)
 {
+#if LV_USE_BAR
+  luavgl_bar_init(L);
+#endif
+
 #if LV_USE_IMG
   luavgl_img_init(L);
 #endif
@@ -112,6 +132,10 @@ static void luavgl_widgets_init(lua_State *L)
 
 #if LV_USE_LIST
   luavgl_list_init(L);
+#endif
+
+#if LV_USE_SLIDER
+  luavgl_slider_init(L);
 #endif
 
 #if LV_USE_SWITCH
