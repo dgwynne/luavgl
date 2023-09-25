@@ -7,16 +7,25 @@ luavgl_bar_create(lua_State *L)
 	return luavgl_obj_create_helper(L, lv_bar_create);
 }
 
+static int32_t
+_lv_bar_tovalue(lv_obj_t *obj, lua_State *L, int idx)
+{
+	const char *str = lua_tostring(L, idx);
+	int32_t v;
+
+	if (strcasecmp(str, "min") == 0)
+		return lv_bar_get_min_value(obj);
+
+	if (strcasecmp(str, "max") == 0)
+		return lv_bar_get_max_value(obj);
+
+	return luaL_checkinteger(L, idx);
+}
+
 static void
 _lv_bar_set_value(void *obj, lua_State *L)
 {
-	if (!lua_isinteger(L, -1)) {
-		luaL_argerror(L, -1, "only support integer for value.");
-		return;
-	}
-
-	lv_bar_set_value(obj, lua_tointeger(L, -1),
-	    lua_toboolean(L, -2) ? LV_ANIM_ON : LV_ANIM_OFF);
+	lv_bar_set_value(obj, _lv_bar_tovalue(obj, L, -1), LV_ANIM_OFF);
 }
 
 static void
@@ -122,19 +131,15 @@ static int
 luavgl_bar_value(lua_State *L)
 {
 	lv_obj_t *obj = luavgl_to_obj(L, 1);
-	int32_t v;
 
 	if (lua_gettop(L) > 1) {
-		/* set */
-		v = luaL_checkinteger(L, 2);
-		lv_bar_set_value(obj, v,
+		/* set first */
+		lv_bar_set_value(obj, _lv_bar_tovalue(obj, L, 2),
 		    lua_toboolean(L, 3) ? LV_ANIM_ON : LV_ANIM_OFF);
-	} else {
-		/* get */
-		v = lv_bar_get_value(obj);
 	}
 
-	lua_pushinteger(L, v);
+	/* lvgl limits the new value to the range, so get the resulting value */
+	lua_pushinteger(L, lv_bar_get_value(obj));
 	return (1);
 }
 
@@ -150,7 +155,7 @@ static int
 luavgl_bar_set_value(lua_State *L)
 {
 	lv_obj_t *obj = luavgl_to_obj(L, 1);
-	lv_bar_set_value(obj, luaL_checkinteger(L, 2),
+	lv_bar_set_value(obj, _lv_bar_tovalue(obj, L, 2),
 	    lua_toboolean(L, 3) ? LV_ANIM_ON : LV_ANIM_OFF);
 	return (0);
 }
