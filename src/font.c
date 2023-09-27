@@ -215,9 +215,7 @@ static const lv_font_t *_luavgl_font_create(lua_State *L, const char *name,
   /* not built-in font, check extension  */
   luavgl_ctx_t *ctx = luavgl_context(L);
   if (ctx->make_font) {
-lv_font_t *f = ctx->make_font(name, size, weight);
-printf("%s %s %d %d -> %p\n", __func__, name, size, weight, f);
-    return f;
+    return ctx->make_font(name, size, weight);
   }
 
   return NULL;
