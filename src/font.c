@@ -7,8 +7,7 @@
 
 /**
  * Follow css style, specify the name by name family, name size,
- * name weight. Font weight can be numeric value or 'bold'. Alls strings
- * are converted to lower-case before matching with local supported name.
+ * name weight. Font weight can be numeric value or 'bold'.
  *
  * weight   named weight
  * 100      thin
@@ -159,7 +158,7 @@ static int luavgl_get_named_weight(const char *name)
   }
 
   for (int i = 0; i < _ARRAY_LEN(g_named_weight); i++) {
-    if (strcmp(name, g_named_weight[i].name) == 0) {
+    if (strcasecmp(name, g_named_weight[i].name) == 0) {
       return g_named_weight[i].value;
     }
   }
@@ -167,18 +166,11 @@ static int luavgl_get_named_weight(const char *name)
   return FONT_DEFAULT_SIZE;
 }
 
-static char *to_lower(char *str)
-{
-  for (char *s = str; *s; ++s)
-    *s = *s >= 'A' && *s <= 'Z' ? *s | 0x60 : *s;
-  return str;
-}
-
 static const lv_font_t *_luavgl_font_create(lua_State *L, const char *name,
                                             int size, int weight)
 {
   /* check builtin font firstly. */
-  if (strcmp(name, "montserrat") == 0) {
+  if (strcasecmp(name, "montserrat") == 0) {
     if (FONT_WEIGHT_NORMAL != weight)
       return NULL;
 
@@ -187,7 +179,7 @@ static const lv_font_t *_luavgl_font_create(lua_State *L, const char *name,
         return g_builtin_montserrat[i].font;
       }
     }
-  } else if (strcmp(name, "unscii") == 0) {
+  } else if (strcasecmp(name, "unscii") == 0) {
     if (FONT_WEIGHT_NORMAL != weight)
       return NULL;
 #if LV_FONT_UNSCII_8
@@ -201,20 +193,20 @@ static const lv_font_t *_luavgl_font_create(lua_State *L, const char *name,
 #endif
   }
 #if LV_FONT_MONTSERRAT_12_SUBPX
-  else if (strcmp(name, "montserrat_subpx") == 0) {
+  else if (strcasecmp(name, "montserrat_subpx") == 0) {
     if (size == 12)
       return &lv_font_montserrat_12_subpx;
   }
 #endif
 #if LV_FONT_DEJAVU_16_PERSIAN_HEBREW
-  else if (strcmp(name, "dejavu_persian_hebrew") == 0) {
+  else if (strcasecmp(name, "dejavu_persian_hebrew") == 0) {
     if (size == 16)
       return &lv_font_dejavu_16_persian_hebrew;
   }
 #endif
 
 #if LV_FONT_SIMSUN_16_CJK
-  else if (strcmp(name, "dejavu_persian_hebrew") == 0) {
+  else if (strcasecmp(name, "dejavu_persian_hebrew") == 0) {
     if (size == 16)
       return &lv_font_simsun_16_cjk;
   }
@@ -223,7 +215,9 @@ static const lv_font_t *_luavgl_font_create(lua_State *L, const char *name,
   /* not built-in font, check extension  */
   luavgl_ctx_t *ctx = luavgl_context(L);
   if (ctx->make_font) {
-    return ctx->make_font(name, size, weight);
+lv_font_t *f = ctx->make_font(name, size, weight);
+printf("%s %s %d %d -> %p\n", __func__, name, size, weight, f);
+    return f;
   }
 
   return NULL;
@@ -240,7 +234,7 @@ static int luavgl_font_create(lua_State *L)
 {
   int weight;
   int size;
-  char *str, *name;
+  const char *name;
   const lv_font_t *font = NULL;
 
   if (!lua_isstring(L, 1)) {
@@ -257,53 +251,15 @@ static int luavgl_font_create(lua_State *L)
     if (lua_isinteger(L, 3)) {
       weight = lua_tointeger(L, 3);
     } else {
-      char *luastr = (char *)lua_tostring(L, 3);
-      int len = strlen(luastr);
-      if (len > 128) {
-        /* not likely to happen */
-        return luaL_argerror(L, 3, "too long");
-      }
-      char s[len + 1];
-      strcpy(s, luastr);
-      weight = luavgl_get_named_weight(to_lower(s));
+      const char *s = lua_tostring(L, 3);
+      weight = luavgl_get_named_weight(s);
     }
   } else {
     weight = FONT_WEIGHT_NORMAL;
   }
 
-  str = strdup(lua_tostring(L, 1));
-  if (str == NULL) {
-    return luaL_error(L, "no memory.");
-  }
-
-  name = to_lower(str);
-  while (*name) {
-    if (*name == ' ') {
-      name++;
-      continue;
-    }
-
-    char *end = strchr(name, ',');
-    if (end != NULL) {
-      *end = '\0';
-    } else {
-      end = name + strlen(name);
-    }
-
-    char *trim = end - 1;
-    while (*trim == ' ') {
-      *trim-- = '\0'; /* trailing space. */
-    }
-
-    font = _luavgl_font_create(L, name, size, weight);
-    if (font) {
-      break;
-    }
-
-    name = end + 1; /* next */
-  }
-
-  free(str);
+  name = lua_tostring(L, 1);
+  font = _luavgl_font_create(L, name, size, weight);
   if (font) {
     lua_pushlightuserdata(L, (void *)font);
     return 1;
