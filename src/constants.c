@@ -1,5 +1,39 @@
 #include "private.h"
 
+#ifndef nitems
+#define nitems(_a) (sizeof((_a)) / sizeof((_a)[0]))
+#endif
+
+struct luavgl_enum_entry {
+	lua_Integer v;
+	const char *n;
+};
+
+static void
+luavgl_enum_map_len_init(lua_State *L, const struct luavgl_enum_entry *map,
+    size_t nmap)
+{
+	size_t i;
+
+	lua_newtable(L);
+	for (i = 0; i < nmap; i++) {
+		const struct luavgl_enum_entry *e = &map[i];
+		lua_pushstring(L, e->n);
+		lua_pushinteger(L, e->v);
+		lua_settable(L, -3);
+	}
+}
+
+#define luavgl_enum_map_init(_L, _map) \
+    luavgl_enum_map_len_init((_L), (_map), nitems(_map))
+
+static const struct luavgl_enum_entry luavgl_text_align_map[] = {
+	{ LV_TEXT_ALIGN_AUTO,		"auto" },
+	{ LV_TEXT_ALIGN_LEFT,		"left" },
+	{ LV_TEXT_ALIGN_CENTER,		"center" },
+	{ LV_TEXT_ALIGN_RIGHT,		"right" },
+};
+
 /* clang-format off */
 static void luavgl_event_code_init(lua_State* L)
 {
@@ -491,6 +525,9 @@ static void luavgl_constants_init(lua_State *L)
   lua_setfield(L, -2, "ROLLER_MODE");
   luavgl_key_init(L);
   lua_setfield(L, -2, "KEY");
+
+  luavgl_enum_map_init(L, luavgl_text_align_map);
+  lua_setfield(L, -2, "TEXT_ALIGN");
   /* miscellaneous. */
 
   lua_pushinteger(L, LV_ANIM_REPEAT_INFINITE);
