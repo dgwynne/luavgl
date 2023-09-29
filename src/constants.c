@@ -34,6 +34,12 @@ static const struct luavgl_enum_entry luavgl_text_align_map[] = {
 	{ LV_TEXT_ALIGN_RIGHT,		"right" },
 };
 
+static const struct luavgl_enum_entry luavgl_bar_mode_map[] = {
+	{ LV_BAR_MODE_NORMAL,		"NORMAL" },
+	{ LV_BAR_MODE_SYMMETRICAL,	"SYMMETRICAL" },
+	{ LV_BAR_MODE_RANGE,		"RANGE" },
+};
+
 /* clang-format off */
 static void luavgl_event_code_init(lua_State* L)
 {
@@ -528,6 +534,11 @@ static void luavgl_constants_init(lua_State *L)
 
   luavgl_enum_map_init(L, luavgl_text_align_map);
   lua_setfield(L, -2, "TEXT_ALIGN");
+
+  luavgl_enum_map_init(L, luavgl_bar_mode_map);
+  lua_pushvalue(L, -1);
+  lua_setfield(L, -3, "BAR_MODE");
+  lua_setfield(L, -2, "SLIDER_MODE");
   /* miscellaneous. */
 
   lua_pushinteger(L, LV_ANIM_REPEAT_INFINITE);

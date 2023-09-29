@@ -73,6 +73,12 @@ _lv_bar_set_range(void *obj, lua_State *L)
 	lv_bar_set_range(obj, min, max);
 }
 
+static void
+_lv_bar_set_mode(void *obj, lua_State *L)
+{
+	lv_bar_set_mode(obj, lua_tointeger(L, -1));
+}
+
 static const luavgl_value_setter_t bar_property_table[] = {
 	{
 		"min",		SETTER_TYPE_STACK,
@@ -90,6 +96,11 @@ static const luavgl_value_setter_t bar_property_table[] = {
 	{
 		"value",	SETTER_TYPE_STACK,
 		{ .setter_stack = _lv_bar_set_value }
+	},
+
+	{
+		"mode",		SETTER_TYPE_STACK,
+		{ .setter_stack = _lv_bar_set_mode }
 	},
 };
 
@@ -176,6 +187,25 @@ luavgl_bar_get_max(lua_State *L)
 	return (1);
 }
 
+static int
+luavgl_bar_mode(lua_State *L)
+{
+	lv_obj_t *obj = luavgl_to_obj(L, 1);
+	lua_Integer mode;
+
+	if (lua_gettop(L) > 1) {
+		/* set */
+		mode = luaL_checkinteger(L, 2);
+		lv_bar_set_mode(obj, mode);
+	} else {
+		/* get */
+		mode = lv_bar_get_mode(obj);
+	}
+
+	lua_pushinteger(L, mode);
+	return (1);
+}
+
 static const luaL_Reg luavgl_bar_methods[] = {
 	{ "set",		luavgl_bar_set },
 
@@ -185,6 +215,8 @@ static const luaL_Reg luavgl_bar_methods[] = {
 
 	{ "get_min",		luavgl_bar_get_min },
 	{ "get_max",		luavgl_bar_get_max },
+
+	{ "mode",		luavgl_bar_mode },
 
 	{ NULL,			NULL }
 };
