@@ -29,6 +29,12 @@ _lv_bar_set_value(void *obj, lua_State *L)
 }
 
 static void
+_lv_bar_set_start_value(void *obj, lua_State *L)
+{
+	lv_bar_set_start_value(obj, _lv_bar_tovalue(obj, L, -1), LV_ANIM_OFF);
+}
+
+static void
 _lv_bar_set_min(void *obj, lua_State *L)
 {
 	if (!lua_isinteger(L, -1)) {
@@ -96,6 +102,10 @@ static const luavgl_value_setter_t bar_property_table[] = {
 	{
 		"value",	SETTER_TYPE_STACK,
 		{ .setter_stack = _lv_bar_set_value }
+	},
+	{
+		"start_value",	SETTER_TYPE_STACK,
+		{ .setter_stack = _lv_bar_set_start_value }
 	},
 
 	{
@@ -188,6 +198,22 @@ luavgl_bar_get_max(lua_State *L)
 }
 
 static int
+luavgl_bar_start_value(lua_State *L)
+{
+	lv_obj_t *obj = luavgl_to_obj(L, 1);
+
+	if (lua_gettop(L) > 1) {
+		/* set first */
+		lv_bar_set_start_value(obj, _lv_bar_tovalue(obj, L, 2),
+		    lua_toboolean(L, 3) ? LV_ANIM_ON : LV_ANIM_OFF);
+	}
+
+	/* lvgl limits the new value to the range, so get the resulting value */
+	lua_pushinteger(L, lv_bar_get_start_value(obj));
+	return (1);
+}
+
+static int
 luavgl_bar_mode(lua_State *L)
 {
 	lv_obj_t *obj = luavgl_to_obj(L, 1);
@@ -216,6 +242,7 @@ static const luaL_Reg luavgl_bar_methods[] = {
 	{ "get_min",		luavgl_bar_get_min },
 	{ "get_max",		luavgl_bar_get_max },
 
+	{ "start_value",	luavgl_bar_start_value },
 	{ "mode",		luavgl_bar_mode },
 
 	{ NULL,			NULL }

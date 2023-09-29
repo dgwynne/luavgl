@@ -19,6 +19,8 @@ static const luaL_Reg luavgl_slider_methods[] = {
 	/* most of these are handled by lv_bar */
 	{ "set",		luavgl_bar_set },
 	{ "is_dragged",		luavgl_slider_is_dragged },
+	/* lv_bar_start_value is static, which feels weird */
+	{ "left_value",		luavgl_bar_start_value },
 
 	{ NULL,			NULL }
 };
