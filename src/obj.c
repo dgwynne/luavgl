@@ -639,6 +639,14 @@ static int luavgl_obj_get_pos(lua_State *L)
   return 1;
 }
 
+static int
+luavgl_obj_set_click_area(lua_State *L)
+{
+	lv_obj_t *obj = luavgl_to_obj(L, 1);
+	lv_obj_set_ext_click_area(obj, LV_DPX(lua_tointeger(L, 2)));
+	return (0);
+}
+
 /**
  * Remove all animations associates to this object
  */
@@ -740,6 +748,7 @@ static const luaL_Reg luavgl_obj_methods[] = {
     {"indev_search",             luavgl_obj_indev_search            },
     {"get_coords",               luavgl_obj_get_coords              },
     {"get_pos",                  luavgl_obj_get_pos                 },
+    {"set_click_area",		 luavgl_obj_set_click_area,         },
 
     {"onevent",                  luavgl_obj_on_event                },
     {"onPressed",                luavgl_obj_on_pressed              },
