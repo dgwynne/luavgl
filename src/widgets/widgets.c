@@ -67,8 +67,8 @@ static const luaL_Reg widget_create_methods[] = {
 #endif
 
 #if LV_USE_BTN
-    {"Btn", luavgl_bar_create},
-    {"Button", luavgl_bar_create},
+    {"Btn", luavgl_btn_create},
+    {"Button", luavgl_btn_create},
 #endif
 
 #if LV_USE_CALENDAR
